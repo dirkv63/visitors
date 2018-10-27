@@ -13,26 +13,37 @@ from sqlalchemy.orm import sessionmaker, relationship
 Base = declarative_base()
 
 
-class Click(Base):
+class Request(Base):
     """
-    Table containing clickdata
+    Table containing request information
     """
-    __tablename__ = "clicks"
+    __tablename__ = "requests"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    clientip = Column(Text)
-    duration = Column(Integer)
-    protocol = Column(Text)
-    urlpath = Column(Text)
-    urlquery = Column(Text)
+    hostip = Column(Text)
+    version = Column(Text)
+    path = Column(Text)
+    query = Column(Text)
+    server = Column(Text)
+    port = Column(Integer)
+    status = Column(Integer)
     bytes = Column(Integer)
-    timestamp = Column(Text)
-    auth = Column(Text)
-    user = Column(Text)
-    uid = Column(Text)
-    useragent = Column(Text)
-    vhost = Column(Text)
-    vhostip = Column(Text)
-    source = Column(Text, comment="Source File for this record")
+    uagent_id = Column(Integer, ForeignKey('useragents.id'))
+    uagent = relationship("UserAgent", foreign_keys=[uagent_id])
+
+
+class UserAgent(Base):
+    """
+    Table containing User agents.
+    """
+    __tablename__ = "useragents"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    desc = Column(Text)
+    browser_family = Column(Text)
+    browser_version = Column(Text)
+    os_family = Column(Text)
+    os_version = Column(Text)
+    mobile = Column(Integer)
+
 
 class DirectConn:
     """
