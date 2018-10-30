@@ -37,7 +37,7 @@ class UserAgent(Base):
     """
     __tablename__ = "useragents"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    desc = Column(Text)
+    desc = Column(Text, unique=True)
     browser_family = Column(Text)
     browser_version = Column(Text)
     os_family = Column(Text)
@@ -116,9 +116,10 @@ class DirectConn:
         # A drop for sqlite is a remove of the file
         try:
             os.remove(self.db)
-            logging.info("Database {db} will be recreated".format(db=self.db))
+            db_name = os.path.basename(self.db)
+            logging.info("Database {db} will be recreated".format(db=db_name))
         except FileNotFoundError:
-            logging.info("New database {db} will be created".format(db=self.db))
+            logging.info("New database {db} will be created".format(db=db_name))
         # Reconnect to the Database
         self.connect2db()
         # Use SQLAlchemy connection to build the database
