@@ -38,24 +38,20 @@ with open(logfile, 'r') as file:
             sess.commit()
             sess.refresh(ua)
             ua_dict[ua.desc] = ua.id
-        try:
-            request = Request(
-                hostip=line_data["remote_host"],
-                version=line_data["request_http_ver"],
-                path=line_data["request_url_path"],
-                #query=line_data["request_url_query"],
-                server=line_data["server_name"],
-                port=line_data["server_port"],
-                status=line_data["status"],
-                bytes=line_data["bytes_tx"],
-                uagent_id=ua_dict[desc]
-            )
-            sess.add(request)
-            sess.commit()
-            line = file.readline()
-        except  KeyError:
-            for k in line_data:
-                print("{k}: {v}".format(k=k, v=line_data[k]))
-            break
+        request = Request(
+            hostip=line_data["remote_host"],
+            version=line_data["request_http_ver"],
+            url=line_data["request_url"],
+            server=line_data["server_name"],
+            port=line_data["server_port"],
+            status=line_data["status"],
+            bytes=line_data["bytes_tx"],
+            referer=line_data["request_header_referer"],
+            timestamp=line_data["time_received_isoformat"],
+            uagent_id=ua_dict[desc]
+        )
+        sess.add(request)
+        sess.commit()
+        line = file.readline()
         li.info_loop()
     li.end_loop()
