@@ -7,10 +7,13 @@ is a new file and every line in the file is processed.
 import apache_log_parser
 import hashlib
 import logging
+import smtplib
 import time
 from lib import my_env
 from lib import sqlstore
 from lib.sqlstore import Request, UserAgent, FileHash
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from sqlalchemy.orm.exc import NoResultFound
 
 
@@ -71,6 +74,7 @@ cnt = 0
 with open(logfile, 'r') as file:
     line = file.readline()
     while line:
+        cnt += 1
         line_data = line_parser(line)
         desc = line_data["request_header_user_agent"]
         if desc not in ua_dict:
@@ -101,3 +105,26 @@ with open(logfile, 'r') as file:
         sess.add(request)
         sess.commit()
         line = file.readline()
+
+gmail_user = cfg['Mail']['gmail_user']
+gmail_pwd = cfg['Mail']['gmail_pwd']
+recipient = cfg['Mail']['recipient']
+
+msg = MIMEMultipart()
+msg['Subject'] = "Apache Access Log Processed"
+msg['From'] = gmail_user
+msg['To'] = recipient
+body = "Apache Access Log records added, {cnt} records.".format(cnt=cnt)
+msg.attach(MIMEText(body, 'plain'))
+
+smtp_server = cfg['Mail']['smtp_server']
+smtp_port = cfg['Mail']['smtp_port']
+
+server = smtplib.SMTP(smtp_server, smtp_port)
+server.starttls()
+server.login(gmail_user, gmail_pwd)
+text = msg.as_string()
+server.sendmail(gmail_user, recipient, text)
+logging.debug("Mail sent!")
+server.quit()
+logging.info("End Application")
