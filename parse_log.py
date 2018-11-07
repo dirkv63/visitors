@@ -60,6 +60,7 @@ logfile = cfg["Main"]["apache_log"]
 # Slurp logfile to calculate checksum.
 with open(logfile, 'rb') as fp:
     if not file_update("other_vhosts", fp.read()):
+        logging.info("No changes detected in {logfile}".format(logfile=logfile))
         raise SystemExit(0)
 
 # logfile other_vhosts_access_log.1 has been updated, load all records in database.
@@ -127,4 +128,4 @@ text = msg.as_string()
 server.sendmail(gmail_user, recipient, text)
 logging.debug("Mail sent!")
 server.quit()
-logging.info("End Application")
+logging.info("End Application after updating visitors.db")
